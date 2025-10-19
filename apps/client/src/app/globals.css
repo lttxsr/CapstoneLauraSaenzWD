@@ -66,19 +66,25 @@ header.site .btn{
   background:#fff; border-radius:var(--radius-card);
   padding:1rem; border:1px solid rgba(148,163,184,.45);
   box-shadow:var(--shadow-sm);
+  transition: box-shadow .18s ease, transform .06s ease, border-color .18s ease;
 }
+.card:hover{ box-shadow:var(--shadow-md); transform: translateY(-1px); }
 
 .btn{
   display:inline-flex; align-items:center; justify-content:center;
   gap:.5rem; padding:.65rem 1rem;
-  border-radius:.75rem; font-weight:600;
+  border-radius:.75rem; font-weight:600; font-size:.9rem;
   border:1px solid transparent; cursor:pointer;
-  transition: filter .15s ease, transform .06s ease, box-shadow .15s ease, background .15s ease;
+  transition: filter .15s ease, transform .06s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
   white-space:nowrap; user-select:none; text-align:center;
+  line-height:1.1;
 }
-.btn:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(40,75,99,.25); }
+.btn:focus-visible{ outline:none; box-shadow:0 0 0 3px rgba(40,75,99,.22); }
 .btn:active{ transform: translateY(1px); }
 .btn:disabled{ opacity:.55; cursor:not-allowed; transform:none !important; }
+
+.btn-sm{ padding:.45rem .75rem; border-radius:.6rem; font-weight:600; font-size:.85rem; }
+.btn-lg{ padding:.75rem 1.15rem; border-radius:.85rem; font-weight:700; font-size:1rem; }
 
 .btn-primary{
   color:#fff;
@@ -89,20 +95,29 @@ header.site .btn{
 .btn-primary:hover{ filter:brightness(.94); }
 .btn-primary:active{ filter:brightness(.9); }
 
-.btn-ghost{
+.btn-secondary{
   background:#fff; color:#334155; border-color:#cbd5e1;
   box-shadow:0 1px 0 rgba(15,23,42,.04);
 }
+.btn-secondary:hover{ background:#f8fafc; }
+
+.btn-ghost{
+  background:transparent; color:#334155; border-color:transparent;
+}
 .btn-ghost:hover{ background:#f1f5f9; }
 
-.btn-sm{ padding:.45rem .75rem; border-radius:.6rem; font-weight:600; }
+.btn-danger{
+  color:#fff; background:#e11d48; border:none;
+  box-shadow: 0 4px 10px rgba(225,29,72,.22);
+}
+.btn-danger:hover{ filter:brightness(.95); }
 
 .input{
   width:100%; padding:.6rem .8rem;
   border-radius:.75rem; background:#fff; border:1px solid #cbd5e1; outline:none;
   transition: box-shadow .15s ease, border-color .15s ease;
 }
-.input:focus{ border-color:#93c5fd; box-shadow:0 0 0 3px rgba(40,75,99,.28); }
+.input:focus{ border-color:#93c5fd; box-shadow:0 0 0 3px rgba(40,75,99,.18); }
 
 .modal-backdrop{
   position: fixed; inset: 0;

@@ -1,4 +1,4 @@
-import type { BookRef } from "@/types";
+import type { BookRef, Loan, CreateLoanResult } from "@/types";
 
 const API = process.env.NEXT_PUBLIC_API_BASE!;
 
@@ -99,14 +99,17 @@ export const api = {
     return r.json();
   },
 
-  async loans() {
-    const r = await fetch(`${API}/api/loans`, { headers: authHeaders(), cache: "no-store" });
+  async loans(includeHistory = true): Promise<Loan[]> {
+    const r = await fetch(`${API}/api/loans?includeHistory=${includeHistory ? "true" : "false"}`, {
+      headers: authHeaders(),
+      cache: "no-store",
+    });
     if (r.status === 401) throw new Error("No autenticado");
     if (!r.ok) throw new Error("Error al listar préstamos");
     return r.json();
   },
 
-  async createLoan(book: BookRef, days = 14) {
+  async createLoan(book: BookRef, days = 14): Promise<CreateLoanResult> {
     const r = await fetch(`${API}/api/loans`, {
       method: "POST",
       headers: jsonHeaders(),
@@ -131,6 +134,39 @@ export const api = {
     });
     if (r.status === 401) throw new Error("No autenticado");
     if (!r.ok) throw new Error("No se pudo devolver préstamo");
+    return r.json();
+  },
+
+  async renewLoan(id: string, days = 7) {
+    const r = await fetch(`${API}/api/loans?id=${encodeURIComponent(id)}&action=renew`, {
+      method: "PATCH",
+      headers: jsonHeaders(),
+      body: JSON.stringify({ days }),
+    });
+    if (r.status === 401) throw new Error("No autenticado");
+    if (!r.ok) throw new Error("No se pudo renovar el préstamo");
+    return r.json();
+  },
+
+  async reservations() {
+    const r = await fetch(`${API}/api/reservations`, { headers: authHeaders(), cache: "no-store" });
+    if (r.status === 401) throw new Error("No autenticado");
+    if (!r.ok) {
+      const text = await r.text().catch(() => "");
+      console.error("GET /api/reservations FAILED:", r.status, text);
+      throw new Error("Error al listar reservas");
+    }
+    return r.json();
+  },
+
+  async cancelReservation(id: string) {
+    const r = await fetch(`${API}/api/reservations/${id}`, { method: "DELETE", headers: authHeaders() });
+    if (r.status === 401) throw new Error("No autenticado");
+    if (!r.ok) {
+      const text = await r.text().catch(() => "");
+      console.error("DELETE /api/reservations/:id FAILED:", r.status, text);
+      throw new Error("No se pudo cancelar la reserva");
+    }
     return r.json();
   },
 };

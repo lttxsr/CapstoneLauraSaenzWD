@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider   = "prisma-client-js"
+  engineType = "binary"
 }
 
 datasource db {
@@ -14,8 +15,9 @@ model User {
   passwordHash String
   createdAt    DateTime @default(now())
 
-  favorites Favorite[]
-  loans     Loan[]
+  favorites    Favorite[]
+  loans        Loan[]
+  reservations Reservation[]
 }
 
 model Favorite {
@@ -26,7 +28,6 @@ model Favorite {
   author    String?
   coverUrl  String?
   year      Int?
-
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
 
@@ -34,16 +35,36 @@ model Favorite {
 }
 
 model Loan {
-  id        String   @id @default(cuid())
-  userId    String
-  bookId    String
-  title     String
-  author    String?
-  coverUrl  String?
-  year      Int?
+  id         String   @id @default(cuid())
+  userId     String
+  bookId     String
+  title      String
+  author     String?
+  coverUrl   String?
+  year       Int?
+  due        DateTime
+  returned   Boolean  @default(false)
+  returnedAt DateTime?
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+  @@index([bookId, returned])
+}
 
-  due       DateTime
-  returned  Boolean  @default(false)
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
+model Reservation {
+  id            String   @id @default(cuid())
+  userId        String
+  bookId        String
+  title         String
+  author        String?
+  coverUrl      String?
+  year          Int?
+  requestedDays Int       @default(14)
+  status        String    @default("PENDING") // "PENDING" | "FULFILLED" | "CANCELED"
+  createdAt     DateTime  @default(now())
+  fulfilledAt   DateTime?
+  canceledAt    DateTime?
+
+  user          User      @relation(fields: [userId], references: [id])
+  @@unique([userId, bookId, status])           // evita 2 reservas PENDING del mismo libro por el mismo usuario
+  @@index([bookId, status, createdAt])         // para la cola
 }
