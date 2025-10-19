@@ -65,6 +65,8 @@ model Reservation {
   canceledAt    DateTime?
 
   user          User      @relation(fields: [userId], references: [id])
-  @@unique([userId, bookId, status])           // evita 2 reservas PENDING del mismo libro por el mismo usuario
-  @@index([bookId, status, createdAt])         // para la cola
+
+  // INDICES (no unique)
+  @@index([userId, bookId, status])
+  @@index([bookId, status, createdAt])
 }

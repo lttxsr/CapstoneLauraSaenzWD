@@ -21,8 +21,8 @@ export class LoanService {
         return { conflict: true as const, message: "Ya tienes este libro en préstamo.", due: activeLoan.due };
       }
 
-      const existing = await prisma.reservation.findUnique({
-        where: { userId_bookId_status: { userId, bookId: b.id, status: "PENDING" } },
+      const existing = await prisma.reservation.findFirst({
+        where: { userId, bookId: b.id, status: "PENDING" },
       });
 
       const reservation = existing
