@@ -1,0 +1,44 @@
+.nav {
+  display: none;
+}
+@media (min-width: 768px) {
+  .nav {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+}
+
+.link {
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-pill);
+  line-height: 1;
+  color: #fff;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: background .2s ease, transform .1s ease;
+}
+.link:hover {
+  background: rgba(255,255,255,.10);
+}
+
+.active {
+  background: rgba(255,255,255,.20);
+  border-color: rgba(255,255,255,.25);
+  box-shadow: 0 6px 16px rgba(0,0,0,.07) inset;
+}
+
+.spacer {
+  flex: 1 1 0%;
+}
+
+.search {
+  width: 100%;
+}
+@media (min-width: 768px) {
+  .search { width: 520px; }
+}
+
+.authBtn {
+  margin-left: .5rem;
+}
