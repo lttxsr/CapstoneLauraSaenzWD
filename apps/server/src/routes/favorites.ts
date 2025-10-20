@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
-import { FavoriteService } from "../services/FavoriteService.js";
-import { requireAuth } from "../middleware/auth.js";
+import { FavoriteService } from "../services/FavoriteService";
+import { requireAuth } from "../middleware/auth";
 
 const r = Router();
 const svc = new FavoriteService();

@@ -1,7 +1,7 @@
-import { prisma } from "../prisma.js";
+import { prisma } from "../prisma";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { config } from "../config.js";
+import { config } from "../config";
 
 export class AuthService {
   async register(name: string | undefined, email: string, password: string) {

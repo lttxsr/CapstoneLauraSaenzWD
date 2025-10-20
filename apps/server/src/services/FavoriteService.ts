@@ -1,5 +1,5 @@
-import { prisma } from "../prisma.js";
-import type { BookPayload } from "../types/book.js";
+import { prisma } from "../prisma";
+import type { BookPayload } from "../types/book";
 
 export class FavoriteService {
   async list(userId: string) {

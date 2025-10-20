@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
-import { LoanService } from "../services/LoanService.js";
-import { requireAuth } from "../middleware/auth.js";
+import { LoanService } from "../services/LoanService";
+import { requireAuth } from "../middleware/auth";
 
 const r = Router();
 const svc = new LoanService();

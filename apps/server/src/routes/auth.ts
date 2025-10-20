@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import { AuthService } from "../services/AuthService.js";
+import { AuthService } from "../services/AuthService";
 
 const r = Router();
 const auth = new AuthService();

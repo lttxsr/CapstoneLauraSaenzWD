@@ -1,8 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import { config } from "../config.js";
+import { config } from "../config";
 
-/** Verifica el JWT (Authorization: Bearer <token>) y adjunta req.user */
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
   const header = req.headers.authorization || "";
   const token = header.startsWith("Bearer ") ? header.slice(7) : null;

@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { requireAuth } from "../middleware/auth.js";
-import { LoanService } from "../services/LoanService.js";
+import { requireAuth } from "../middleware/auth";
+import { LoanService } from "../services/LoanService";
 
 const r = Router();
 const svc = new LoanService();

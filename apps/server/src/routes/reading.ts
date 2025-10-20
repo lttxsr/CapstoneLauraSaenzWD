@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
-import { requireAuth } from "../middleware/auth.js";
-import { ReadingService } from "../services/ReadingService.js";
+import { requireAuth } from "../middleware/auth";
+import { ReadingService } from "../services/ReadingService";
 
 const r = Router();
 const svc = new ReadingService();

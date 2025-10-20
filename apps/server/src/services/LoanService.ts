@@ -1,5 +1,5 @@
-import { prisma } from "../prisma.js";
-import type { BookPayload } from "../types/book.js";
+import { prisma } from "../prisma";
+import type { BookPayload } from "../types/book";
 import type { Reservation as DbReservation } from "@prisma/client";
 
 export class LoanService {

@@ -2,12 +2,12 @@ import express from "express";
 import helmet from "helmet";
 import cors from "cors";
 import morgan from "morgan";
-import { config } from "./config.js";
-import authRoutes from "./routes/auth.js";
-import favoritesRoutes from "./routes/favorites.js";
-import loansRoutes from "./routes/loans.js";
-import reservationsRouter from "./routes/reservations.js";
-import readingRouter from "./routes/reading.js";
+import { config } from "./config";
+import authRoutes from "./routes/auth";
+import favoritesRoutes from "./routes/favorites";
+import loansRoutes from "./routes/loans";
+import reservationsRouter from "./routes/reservations";
+import readingRouter from "./routes/reading";
 
 const app = express();
 
