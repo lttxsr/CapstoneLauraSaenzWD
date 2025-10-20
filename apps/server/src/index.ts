@@ -13,22 +13,27 @@ const app = express();
 
 const origins = (process.env.CORS_ORIGIN || "*")
   .split(",")
-  .map(s => s.trim())
+  .map((s) => s.trim())
   .filter(Boolean);
 
 app.use(helmet());
-app.use(cors({
-  origin: (origin, cb) => {
-    if (!origin) return cb(null, true);
-    if (origins.includes("*") || origins.includes(origin)) return cb(null, true);
-    cb(new Error("Not allowed by CORS"));
-  },
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true);
+      if (origins.includes("*") || origins.includes(origin)) return cb(null, true);
+      cb(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  })
+);
+
 app.use(express.json({ limit: "1mb" }));
 app.use(morgan("dev"));
 
-app.get("/health", (_req, res) => res.json({ ok: true, time: new Date().toISOString() }));
+app.get("/health", (_req, res) =>
+  res.json({ ok: true, time: new Date().toISOString() })
+);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/favorites", favoritesRoutes);
@@ -44,19 +49,30 @@ interface AppError extends Error {
   [key: string]: any;
 }
 
-interface AppRequest extends express.Request {}
-interface AppResponse extends express.Response {}
-
-app.use((err: AppError, _req: AppRequest, res: AppResponse, _next: express.NextFunction) => {
-  console.error(err);
-  res.status(500).json({ error: "INTERNAL_ERROR" });
-});
+app.use(
+  (err: AppError, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    console.error(err);
+    res.status(500).json({ error: "INTERNAL_ERROR" });
+  }
+);
 
 export default app;
 
 if (!process.env.VERCEL) {
-  const port = Number(config.port || 4000);
-  app.listen(port, () => {
-    console.log(`API listening on http://localhost:${port}`);
-  });
+  const port = Number(process.env.PORT || config.port || 4000);
+  app
+    .listen(port, () => {
+      console.log(`API listening on http://localhost:${port}`);
+    })
+    .on("error", (err: any) => {
+      if (err?.code === "EADDRINUSE") {
+        const fallback = port + 1;
+        console.warn(`Puerto ${port} en uso. Intentando ${fallback}...`);
+        app.listen(fallback, () => {
+          console.log(` API listening on http://localhost:${fallback}`);
+        });
+      } else {
+        console.error(err);
+      }
+    });
 }
