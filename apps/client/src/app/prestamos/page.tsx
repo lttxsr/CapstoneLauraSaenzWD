@@ -6,7 +6,8 @@ import EmptyState from "@/components/EmptyState";
 import type { Loan, Reservation } from "@/types";
 import { format, isPast, differenceInCalendarDays } from "date-fns";
 import RequireAuth from "@/components/RequireAuth";
-import styles from "@/styles/components/Loans.module.css"; // ← asegúrate de esta ruta
+import styles from "@/styles/components/Loans.module.css"; 
+import { toast } from "@/lib/toast";
 
 export default function PrestamosPage() {
   const [loans, setLoans] = useState<Loan[]>([]);
@@ -98,6 +99,7 @@ export default function PrestamosPage() {
                         className="btn btn-primary btn-sm"
                         onClick={async () => {
                           await api.returnLoan(l.id);
+                          toast("👍 Libro devuelto con éxito.");
                           await refresh();
                         }}
                       >

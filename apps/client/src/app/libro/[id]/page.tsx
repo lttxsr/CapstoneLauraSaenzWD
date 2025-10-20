@@ -9,6 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 import BorrowDialog from "@/components/BorrowDialog";
 import type { ReadingRow, ReadingState, BookRef } from "@/types";
 import styles from "@/styles/components/BookDetails.module.css";
+import { toast } from "@/lib/toast";
 
 type Work = {
   key: string;
@@ -127,6 +128,7 @@ export default function BookDetailsPage() {
     try {
       if (isFav) {
         await api.removeFavorite(bookRef.id);
+        toast("💔 Libro eliminado de favoritos.");
         if (reading?.status === "WISHLIST") {
           const r = await api.setReading(bookRef.id, "NONE");
           setReading(r);
@@ -134,6 +136,7 @@ export default function BookDetailsPage() {
         setIsFav(false);
       } else {
         await api.addFavorite(bookRef);
+        toast("❤️ Libro agregado a favoritos (Lista de deseos).");
         const r = await api.setReading(bookRef.id, "WISHLIST");
         setReading(r);
         setIsFav(true);

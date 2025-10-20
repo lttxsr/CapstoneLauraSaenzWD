@@ -4,6 +4,7 @@ import { useState } from "react";
 import { api } from "@/lib/api";
 import type { BookRef } from "@/types";
 import styles from "@/styles/components/BorrowDialog.module.css";
+import { toast } from "@/lib/toast";
 
 interface BorrowDialogProps {
   book: BookRef | null;
@@ -21,6 +22,7 @@ export default function BorrowDialog({ book, onClose, onDone }: BorrowDialogProp
     setLoading(true);
     try {
       await api.createLoan(book, days);
+      toast("Préstamo creado con éxito 😋👌🏼. Puedes verlo en la sección de Préstamos.");
       onDone?.();
       onClose();
     } finally {
