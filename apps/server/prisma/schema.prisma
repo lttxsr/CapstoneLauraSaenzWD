@@ -1,11 +1,11 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
 generator client {
   provider   = "prisma-client-js"
   engineType = "binary"
-}
-
-datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -36,7 +36,7 @@ model Favorite {
 }
 
 model Loan {
-  id         String   @id @default(cuid())
+  id         String    @id @default(cuid())
   userId     String
   bookId     String
   title      String
@@ -44,15 +44,16 @@ model Loan {
   coverUrl   String?
   year       Int?
   due        DateTime
-  returned   Boolean  @default(false)
+  returned   Boolean   @default(false)
   returnedAt DateTime?
-  createdAt  DateTime @default(now())
-  user       User     @relation(fields: [userId], references: [id])
+  createdAt  DateTime  @default(now())
+  user       User      @relation(fields: [userId], references: [id])
+
   @@index([bookId, returned])
 }
 
 model Reservation {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   userId        String
   bookId        String
   title         String
@@ -65,9 +66,8 @@ model Reservation {
   fulfilledAt   DateTime?
   canceledAt    DateTime?
 
-  user          User      @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
-  // INDICES (no unique)
   @@index([userId, bookId, status])
   @@index([bookId, status, createdAt])
 }
@@ -76,11 +76,11 @@ model Reading {
   id        String   @id @default(cuid())
   userId    String
   bookId    String
-  status    String   @default("NONE") 
+  status    String   @default("NONE")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user      User     @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
   @@unique([userId, bookId])
   @@index([userId, status])
