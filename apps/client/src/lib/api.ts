@@ -9,9 +9,7 @@ import type {
 const RAW = process.env.NEXT_PUBLIC_API_BASE;
 if (!RAW) {
    
-  console.warn(
-    "NEXT_PUBLIC_API_BASE no está definido; usando http://localhost:4000"
-  );
+  console.warn("NEXT_PUBLIC_API_BASE no está definido; usando http://localhost:4000");
 }
 const API = (RAW || "http://localhost:4000").replace(/\/+$/, "");
 
@@ -72,9 +70,7 @@ type FavoriteRow = {
 
 export const api = {
   async search(q: string, page = 1): Promise<SearchResult> {
-    const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(
-      q
-    )}&page=${page}`;
+    const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&page=${page}`;
     const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) throw new Error("Error buscando libros");
     const data: { docs: OLDoc[]; numFound?: number } = await res.json();
@@ -89,13 +85,10 @@ export const api = {
   },
 
   async category(subject: string, page = 1): Promise<SearchResult> {
-    const url = `https://openlibrary.org/subjects/${encodeURIComponent(
-      subject
-    )}.json?limit=40&offset=${(page - 1) * 40}`;
+    const url = `https://openlibrary.org/subjects/${encodeURIComponent(subject)}.json?limit=40&offset=${(page - 1) * 40}`;
     const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) throw new Error("Error obteniendo categoría");
-    const data: { works: OLSubjectWork[]; work_count?: number } =
-      await res.json();
+    const data: { works: OLSubjectWork[]; work_count?: number } = await res.json();
     const books: BookRef[] = (data.works || []).map((w) => ({
       id: w.key,
       title: w.title,
@@ -106,14 +99,24 @@ export const api = {
     return { total: data.work_count || books.length, books };
   },
 
-  async favorites() {
-    const r = await apiFetch(`/api/favorites`, {
-      headers: authHeaders(),
-      cache: "no-store",
-    });
+  async favoritesStrict() {
+    const r = await apiFetch(`/api/favorites`, { headers: authHeaders(), cache: "no-store" });
     if (r.status === 401) throw new Error("No autenticado");
     if (!r.ok) throw new Error("Error al listar favoritos");
     return r.json();
+  },
+
+  async favorites(): Promise<FavoriteRow[]> {
+    const hasToken =
+      typeof window !== "undefined" && !!localStorage.getItem("auth:token");
+    if (!hasToken) return [];
+    try {
+      const r = await apiFetch(`/api/favorites`, { headers: authHeaders(), cache: "no-store" });
+      if (r.status === 401 || !r.ok) return [];
+      return r.json();
+    } catch {
+      return [];
+    }
   },
 
   async addFavorite(book: BookRef) {
@@ -143,8 +146,12 @@ export const api = {
     return r.json();
   },
 
+  async favoritesSafe(): Promise<FavoriteRow[]> {
+    return api.favorites();
+  },
+
   async favoritesIds(): Promise<Set<string>> {
-    const favs = (await api.favorites()) as FavoriteRow[];
+    const favs = (await api.favoritesSafe()) as FavoriteRow[];
     return new Set(favs.map((f) => f.bookId));
   },
 
@@ -155,10 +162,10 @@ export const api = {
 
 
   async loans(includeHistory = true): Promise<Loan[]> {
-    const r = await apiFetch(
-      `/api/loans?includeHistory=${includeHistory ? "true" : "false"}`,
-      { headers: authHeaders(), cache: "no-store" }
-    );
+    const r = await apiFetch(`/api/loans?includeHistory=${includeHistory ? "true" : "false"}`, {
+      headers: authHeaders(),
+      cache: "no-store",
+    });
     if (r.status === 401) throw new Error("No autenticado");
     if (!r.ok) throw new Error("Error al listar préstamos");
     return r.json();
@@ -204,10 +211,7 @@ export const api = {
   },
 
   async reservations() {
-    const r = await apiFetch(`/api/reservations`, {
-      headers: authHeaders(),
-      cache: "no-store",
-    });
+    const r = await apiFetch(`/api/reservations`, { headers: authHeaders(), cache: "no-store" });
     if (r.status === 401) throw new Error("No autenticado");
     if (!r.ok) {
       const text = await r.text().catch(() => "");
@@ -280,5 +284,5 @@ export const api = {
       return { fav: false, reading };
     }
   },
-
+  
 };
