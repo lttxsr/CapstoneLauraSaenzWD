@@ -51,28 +51,13 @@ interface AppError extends Error {
 
 app.use(
   (err: AppError, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-    console.error(err);
+    console.error("❌ Internal error:", err);
     res.status(500).json({ error: "INTERNAL_ERROR" });
   }
 );
 
-export default app;
+const port = Number(process.env.PORT) || Number(config.port) || 8080;
 
-if (!process.env.VERCEL) {
-  const port = Number(process.env.PORT || config.port || 4000);
-  app
-    .listen(port, () => {
-      console.log(`API listening on http://localhost:${port}`);
-    })
-    .on("error", (err: any) => {
-      if (err?.code === "EADDRINUSE") {
-        const fallback = port + 1;
-        console.warn(`Puerto ${port} en uso. Intentando ${fallback}...`);
-        app.listen(fallback, () => {
-          console.log(` API listening on http://localhost:${fallback}`);
-        });
-      } else {
-        console.error(err);
-      }
-    });
-}
+app.listen(port, "0.0.0.0", () => {
+  console.log(`✅ API listening on port ${port}`);
+});
