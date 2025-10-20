@@ -1,6 +1,19 @@
-import type { BookRef, Loan, CreateLoanResult } from "@/types";
+import type {
+  BookRef,
+  Loan,
+  CreateLoanResult,
+  ReadingRow,
+  ReadingState,
+} from "@/types";
 
-const API = process.env.NEXT_PUBLIC_API_BASE!;
+const RAW = process.env.NEXT_PUBLIC_API_BASE;
+if (!RAW) {
+   
+  console.warn(
+    "NEXT_PUBLIC_API_BASE no está definido; usando http://localhost:4000"
+  );
+}
+const API = (RAW || "http://localhost:4000").replace(/\/+$/, "");
 
 type SearchResult = { total: number; books: BookRef[] };
 
@@ -20,23 +33,48 @@ type OLSubjectWork = {
 };
 
 function authHeaders(): HeadersInit {
-  const token = typeof window !== "undefined" ? localStorage.getItem("auth:token") : null;
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("auth:token") : null;
   const h: Record<string, string> = {};
   if (token) h.Authorization = `Bearer ${token}`;
   return h;
 }
 
 function jsonHeaders(): HeadersInit {
-  return { "Content-Type": "application/json", ...(authHeaders() as Record<string, string>) };
+  return {
+    "Content-Type": "application/json",
+    ...(authHeaders() as Record<string, string>),
+  };
 }
 
 function coverUrlFromOL(cover_i?: number | null): string | null {
   return cover_i ? `https://covers.openlibrary.org/b/id/${cover_i}-L.jpg` : null;
 }
 
+async function apiFetch(path: string, init?: RequestInit) {
+  const url = `${API}${path}`;
+  try {
+    return await fetch(url, init);
+  } catch (err) {
+     
+    console.error("NETWORK ERROR fetching:", url, init, err);
+    throw new Error("No se pudo conectar con el servidor");
+  }
+}
+
+type FavoriteRow = {
+  bookId: string;
+  title: string;
+  author?: string | null;
+  coverUrl?: string | null;
+  year?: number | null;
+};
+
 export const api = {
   async search(q: string, page = 1): Promise<SearchResult> {
-    const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&page=${page}`;
+    const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(
+      q
+    )}&page=${page}`;
     const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) throw new Error("Error buscando libros");
     const data: { docs: OLDoc[]; numFound?: number } = await res.json();
@@ -51,10 +89,13 @@ export const api = {
   },
 
   async category(subject: string, page = 1): Promise<SearchResult> {
-    const url = `https://openlibrary.org/subjects/${encodeURIComponent(subject)}.json?limit=40&offset=${(page - 1) * 40}`;
+    const url = `https://openlibrary.org/subjects/${encodeURIComponent(
+      subject
+    )}.json?limit=40&offset=${(page - 1) * 40}`;
     const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) throw new Error("Error obteniendo categoría");
-    const data: { works: OLSubjectWork[]; work_count?: number } = await res.json();
+    const data: { works: OLSubjectWork[]; work_count?: number } =
+      await res.json();
     const books: BookRef[] = (data.works || []).map((w) => ({
       id: w.key,
       title: w.title,
@@ -66,14 +107,17 @@ export const api = {
   },
 
   async favorites() {
-    const r = await fetch(`${API}/api/favorites`, { headers: authHeaders(), cache: "no-store" });
+    const r = await apiFetch(`/api/favorites`, {
+      headers: authHeaders(),
+      cache: "no-store",
+    });
     if (r.status === 401) throw new Error("No autenticado");
     if (!r.ok) throw new Error("Error al listar favoritos");
     return r.json();
   },
 
   async addFavorite(book: BookRef) {
-    const r = await fetch(`${API}/api/favorites`, {
+    const r = await apiFetch(`/api/favorites`, {
       method: "POST",
       headers: jsonHeaders(),
       body: JSON.stringify({
@@ -90,7 +134,7 @@ export const api = {
   },
 
   async removeFavorite(bookId: string) {
-    const r = await fetch(`${API}/api/favorites?bookId=${encodeURIComponent(bookId)}`, {
+    const r = await apiFetch(`/api/favorites?bookId=${encodeURIComponent(bookId)}`, {
       method: "DELETE",
       headers: authHeaders(),
     });
@@ -99,18 +143,29 @@ export const api = {
     return r.json();
   },
 
+  async favoritesIds(): Promise<Set<string>> {
+    const favs = (await api.favorites()) as FavoriteRow[];
+    return new Set(favs.map((f) => f.bookId));
+  },
+
+  async isFavorite(bookId: string): Promise<boolean> {
+    const ids = await api.favoritesIds();
+    return ids.has(bookId);
+  },
+
+
   async loans(includeHistory = true): Promise<Loan[]> {
-    const r = await fetch(`${API}/api/loans?includeHistory=${includeHistory ? "true" : "false"}`, {
-      headers: authHeaders(),
-      cache: "no-store",
-    });
+    const r = await apiFetch(
+      `/api/loans?includeHistory=${includeHistory ? "true" : "false"}`,
+      { headers: authHeaders(), cache: "no-store" }
+    );
     if (r.status === 401) throw new Error("No autenticado");
     if (!r.ok) throw new Error("Error al listar préstamos");
     return r.json();
   },
 
   async createLoan(book: BookRef, days = 14): Promise<CreateLoanResult> {
-    const r = await fetch(`${API}/api/loans`, {
+    const r = await apiFetch(`/api/loans`, {
       method: "POST",
       headers: jsonHeaders(),
       body: JSON.stringify({
@@ -128,7 +183,7 @@ export const api = {
   },
 
   async returnLoan(id: string) {
-    const r = await fetch(`${API}/api/loans?id=${encodeURIComponent(id)}&action=return`, {
+    const r = await apiFetch(`/api/loans?id=${encodeURIComponent(id)}&action=return`, {
       method: "PATCH",
       headers: authHeaders(),
     });
@@ -138,7 +193,7 @@ export const api = {
   },
 
   async renewLoan(id: string, days = 7) {
-    const r = await fetch(`${API}/api/loans?id=${encodeURIComponent(id)}&action=renew`, {
+    const r = await apiFetch(`/api/loans?id=${encodeURIComponent(id)}&action=renew`, {
       method: "PATCH",
       headers: jsonHeaders(),
       body: JSON.stringify({ days }),
@@ -149,7 +204,10 @@ export const api = {
   },
 
   async reservations() {
-    const r = await fetch(`${API}/api/reservations`, { headers: authHeaders(), cache: "no-store" });
+    const r = await apiFetch(`/api/reservations`, {
+      headers: authHeaders(),
+      cache: "no-store",
+    });
     if (r.status === 401) throw new Error("No autenticado");
     if (!r.ok) {
       const text = await r.text().catch(() => "");
@@ -160,7 +218,10 @@ export const api = {
   },
 
   async cancelReservation(id: string) {
-    const r = await fetch(`${API}/api/reservations/${id}`, { method: "DELETE", headers: authHeaders() });
+    const r = await apiFetch(`/api/reservations/${id}`, {
+      method: "DELETE",
+      headers: authHeaders(),
+    });
     if (r.status === 401) throw new Error("No autenticado");
     if (!r.ok) {
       const text = await r.text().catch(() => "");
@@ -169,4 +230,55 @@ export const api = {
     }
     return r.json();
   },
+
+  async getReading(bookId: string): Promise<ReadingRow> {
+    const r = await apiFetch(`/api/reading?bookId=${encodeURIComponent(bookId)}`, {
+      headers: authHeaders(),
+      cache: "no-store",
+    });
+    if (r.status === 401) throw new Error("No autenticado");
+    if (!r.ok) throw new Error("Error al obtener estado de lectura");
+    return r.json();
+  },
+
+  async setReading(bookId: string, status: ReadingState): Promise<ReadingRow> {
+    const r = await apiFetch(`/api/reading`, {
+      method: "PUT",
+      headers: jsonHeaders(),
+      body: JSON.stringify({ bookId, status }),
+    });
+    if (r.status === 401) throw new Error("No autenticado");
+    if (!r.ok) throw new Error("Error al actualizar estado de lectura");
+    return r.json();
+  },
+
+  async listReading(): Promise<ReadingRow[]> {
+    const r = await apiFetch(`/api/reading/list`, {
+      headers: authHeaders(),
+      cache: "no-store",
+    });
+    if (r.status === 401) throw new Error("No autenticado");
+    if (!r.ok) throw new Error("Error al listar estados de lectura");
+    return r.json();
+  },
+
+  async setWishlist(
+    book: BookRef,
+    on: boolean,
+    currentState?: ReadingState
+  ): Promise<{ fav: boolean; reading: ReadingRow }> {
+    if (on) {
+      await api.addFavorite(book);
+      const reading = await api.setReading(book.id, "WISHLIST");
+      return { fav: true, reading };
+    } else {
+      await api.removeFavorite(book.id);
+      const reading =
+        (currentState || (await api.getReading(book.id)).status) === "WISHLIST"
+          ? await api.setReading(book.id, "NONE")
+          : await api.getReading(book.id);
+      return { fav: false, reading };
+    }
+  },
+
 };

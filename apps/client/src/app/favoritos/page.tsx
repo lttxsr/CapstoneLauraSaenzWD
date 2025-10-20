@@ -40,7 +40,9 @@ export default function FavoritosPage() {
     }
   };
 
-  useEffect(() => { refresh(); }, []);
+  useEffect(() => {
+    void refresh();
+  }, []);
 
   return (
     <RequireAuth>

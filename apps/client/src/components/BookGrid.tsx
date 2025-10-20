@@ -1,15 +1,14 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-"use client";
+ "use client";
 import BookCard from "./BookCard";
 import type { BookRef } from "@/types";
 import gridStyles from "@/styles/components/BookGrid.module.css";
 
 export default function BookGrid({
   books,
-  onOpen,
+  hideFavoriteButton = false, 
 }: {
   books: BookRef[];
-  onOpen?: (b: BookRef) => void;
+  hideFavoriteButton?: boolean;
 }) {
   if (!books.length) {
     return (
@@ -24,7 +23,7 @@ export default function BookGrid({
   return (
     <div className={gridStyles.grid}>
       {books.map((b) => (
-        <BookCard key={b.id} book={b} />
+        <BookCard key={b.id} book={b} hideFavoriteButton={hideFavoriteButton} />
       ))}
     </div>
   );

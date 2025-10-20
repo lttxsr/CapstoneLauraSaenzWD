@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import type { BookRef } from "@/types";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
@@ -8,16 +9,24 @@ import BorrowDialog from "@/components/BorrowDialog";
 import { api } from "@/lib/api";
 import styles from "@/styles/components/BookCard.module.css";
 
-export default function BookCard({ book }: { book: BookRef }) {
+type Props = {
+  book: BookRef;
+  hideFavoriteButton?: boolean;
+};
+
+export default function BookCard({ book, hideFavoriteButton = false }: Props) {
   const { token } = useAuth();
   const router = useRouter();
   const [loadingFav, setLoadingFav] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   const guard = (fn: () => void) => () => {
     if (!token) {
-      const url = typeof window !== "undefined"
-        ? window.location.pathname + window.location.search : "/";
+      const url =
+        typeof window !== "undefined"
+          ? window.location.pathname + window.location.search
+          : "/";
       router.push(`/login?next=${encodeURIComponent(url)}`);
       return;
     }
@@ -36,38 +45,56 @@ export default function BookCard({ book }: { book: BookRef }) {
   return (
     <>
       <article className={styles.card}>
-        <button
+        <Link
+          href={`/libro/${encodeURIComponent(book.id)}`}
           className={styles.media}
-          onClick={() => setShowDialog(true)}
-          aria-label={`Pedir ${book.title}`}
+          aria-label={`Ver detalles de ${book.title}`}
         >
-          {book.coverUrl ? (
-            <img src={book.coverUrl} alt={book.title} className={styles.mediaImg} />
+          {book.coverUrl && !imageError ? (
+            <img
+              src={book.coverUrl}
+              alt={`Portada de ${book.title}`}
+              className={styles.mediaImg}
+              onError={() => setImageError(true)}
+              loading="lazy"
+            />
           ) : (
-            <div className={styles.placeholder}><span>Sin portada</span></div>
+            <div className={styles.placeholder}>
+              <span>:/<br />Sin portada</span>
+            </div>
           )}
-        </button>
+        </Link>
 
         <div className={styles.info}>
           <h3 className={styles.title}>{book.title}</h3>
           <p className={styles.author}>{book.author || "Autor desconocido"}</p>
-          {book.year && <p className="text-xs text-slate-500 mt-1">Año: {book.year}</p>}
+          {book.year && (
+            <p className="text-xs text-slate-500 mt-1">Año: {book.year}</p>
+          )}
         </div>
 
         <div className={styles.actions}>
-          <button
-            className="btn btn-ghost btn-sm"
-            onClick={addFav}
-            disabled={loadingFav}
-          >
-            {loadingFav ? "Añadiendo…" : "Favoritos"}
-          </button>
+          {!hideFavoriteButton && (
+            <button
+              className="btn btn-ghost btn-sm"
+              onClick={addFav}
+              disabled={loadingFav}
+              aria-busy={loadingFav}
+            >
+              {loadingFav ? "Añadiendo…" : "Favoritos"}
+            </button>
+          )}
+
           <button
             className="btn btn-primary btn-sm"
             onClick={guard(() => setShowDialog(true))}
           >
             Pedir
           </button>
+
+          <Link href={`/libro/${encodeURIComponent(book.id)}`}>
+            <button className="btn btn-secondary btn-sm">Detalles</button>
+          </Link>
         </div>
       </article>
 
@@ -75,9 +102,7 @@ export default function BookCard({ book }: { book: BookRef }) {
         <BorrowDialog
           book={book}
           onClose={() => setShowDialog(false)}
-          onDone={() => {
-            setShowDialog(false);
-          }}
+          onDone={() => setShowDialog(false)}
         />
       )}
     </>

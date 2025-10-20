@@ -51,3 +51,15 @@ export type CreateLoanResult =
   | { loan: Loan }
   | { reservation: Reservation; position: number }
   | { conflict: true; message: string; due: string }
+
+export type ReadingState = "READING" | "COMPLETED" | "WISHLIST" | "NONE";
+
+export type ReadingRow = {
+  id?: string;
+  userId: string;
+  bookId: string;
+  status: ReadingState;
+  createdAt?: string;
+  updatedAt?: string;
+};
+

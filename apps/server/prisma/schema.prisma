@@ -18,6 +18,7 @@ model User {
   favorites    Favorite[]
   loans        Loan[]
   reservations Reservation[]
+  readings     Reading[]
 }
 
 model Favorite {
@@ -69,4 +70,18 @@ model Reservation {
   // INDICES (no unique)
   @@index([userId, bookId, status])
   @@index([bookId, status, createdAt])
+}
+
+model Reading {
+  id        String   @id @default(cuid())
+  userId    String
+  bookId    String
+  status    String   @default("NONE") 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, bookId])
+  @@index([userId, status])
 }

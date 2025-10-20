@@ -7,6 +7,7 @@ import authRoutes from "./routes/auth.js";
 import favoritesRoutes from "./routes/favorites.js";
 import loansRoutes from "./routes/loans.js";
 import reservationsRouter from "./routes/reservations.js";
+import readingRouter from "./routes/reading.js";
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/favorites", favoritesRoutes);
 app.use("/api/loans", loansRoutes);
 app.use("/api/reservations", reservationsRouter);
+app.use("/api/reading", readingRouter);
 
 app.use((_req, res) => res.status(404).json({ error: "NOT_FOUND" }));
 
