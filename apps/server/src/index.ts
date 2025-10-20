@@ -17,16 +17,20 @@ const origins = (process.env.CORS_ORIGIN || "*")
   .filter(Boolean);
 
 app.use(helmet());
-app.use(
-  cors({
-    origin: (origin, cb) => {
-      if (!origin) return cb(null, true);
-      if (origins.includes("*") || origins.includes(origin)) return cb(null, true);
-      cb(new Error("Not allowed by CORS"));
-    },
-    credentials: true,
-  })
-);
+
+const corsOptions: cors.CorsOptions = {
+  origin(origin, cb) {
+    if (!origin) return cb(null, true);
+    if (origins.includes("*") || origins.includes(origin)) return cb(null, true);
+    return cb(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 app.use(express.json({ limit: "1mb" }));
 app.use(morgan("dev"));
@@ -43,21 +47,14 @@ app.use("/api/reading", readingRouter);
 
 app.use((_req, res) => res.status(404).json({ error: "NOT_FOUND" }));
 
-interface AppError extends Error {
-  status?: number;
-  code?: string;
-  [key: string]: any;
-}
-
-app.use(
-  (err: AppError, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-    console.error("❌ Internal error:", err);
-    res.status(500).json({ error: "INTERNAL_ERROR" });
-  }
-);
+interface AppError extends Error { status?: number; code?: string; [k: string]: any; }
+app.use((err: AppError, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  console.error("❌ Internal error:", err);
+  res.status(500).json({ error: "INTERNAL_ERROR" });
+});
 
 const port = Number(process.env.PORT) || Number(config.port) || 8080;
 
 app.listen(port, "0.0.0.0", () => {
-  console.log(`✅ API listening on port ${port}`);
+  console.log(`✅ API listening on port ${port} | allowed origins:`, origins);
 });
