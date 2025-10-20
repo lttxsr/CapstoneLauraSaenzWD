@@ -21,7 +21,8 @@ export default function BookCard({ book, hideFavoriteButton = false }: Props) {
   const [showDialog, setShowDialog] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  const guard = (fn: () => void) => () => {
+  const guard = (fn: () => void) => (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     if (!token) {
       const url =
         typeof window !== "undefined"
@@ -60,7 +61,9 @@ export default function BookCard({ book, hideFavoriteButton = false }: Props) {
             />
           ) : (
             <div className={styles.placeholder}>
-              <span>:/<br />Sin portada</span>
+              <span>
+                :/<br />Sin portada
+              </span>
             </div>
           )}
         </Link>
@@ -69,14 +72,14 @@ export default function BookCard({ book, hideFavoriteButton = false }: Props) {
           <h3 className={styles.title}>{book.title}</h3>
           <p className={styles.author}>{book.author || "Autor desconocido"}</p>
           {book.year && (
-            <p className="text-xs text-slate-500 mt-1">Año: {book.year}</p>
+            <p className={styles.year}>Año: {book.year}</p>
           )}
         </div>
 
         <div className={styles.actions}>
           {!hideFavoriteButton && (
             <button
-              className="btn btn-ghost btn-sm"
+              className="btn btn-secondary btn-sm"
               onClick={addFav}
               disabled={loadingFav}
               aria-busy={loadingFav}
@@ -92,8 +95,11 @@ export default function BookCard({ book, hideFavoriteButton = false }: Props) {
             Pedir
           </button>
 
-          <Link href={`/libro/${encodeURIComponent(book.id)}`}>
-            <button className="btn btn-secondary btn-sm">Detalles</button>
+          <Link
+            href={`/libro/${encodeURIComponent(book.id)}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button className="btn btn-ghost btn-sm">Detalles</button>
           </Link>
         </div>
       </article>

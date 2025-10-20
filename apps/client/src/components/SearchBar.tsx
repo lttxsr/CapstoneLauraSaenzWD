@@ -12,12 +12,12 @@ export default function SearchBar({ defaultValue, onSearch }: { defaultValue?: s
       <input
         ref={inputRef}
         className="input"
-        placeholder="Buscar por título, autor o palabra clave…"
+        placeholder="Buscar..."
         value={v}
         onChange={e=>setV(e.target.value)}
         aria-label="Buscar libros"
       />
-      <button type="submit" className="btn btn-primary">Buscar</button>
+      <button type="submit" className="btn btn-primary">🔍︎</button>
     </form>
   );
 }

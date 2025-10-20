@@ -1,16 +1,4 @@
 .grid {
-  display:grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 28px;
-  align-items:start;
-}
-@media (min-width:1024px){
-  .grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
-}
-.empty {
-  text-align:center; padding:3rem 1rem;
-}
- .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
   gap: 24px;
@@ -20,5 +8,20 @@
 @media (min-width: 1024px) {
   .grid {
     grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+    padding: 0 .5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
   }
 }
