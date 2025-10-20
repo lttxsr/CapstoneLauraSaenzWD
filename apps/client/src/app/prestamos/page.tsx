@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
 import { api } from "@/lib/api";
 import EmptyState from "@/components/EmptyState";
 import type { Loan, Reservation } from "@/types";
@@ -11,7 +11,7 @@ import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/lib/toast";
 import styles from "@/styles/components/Loans.module.css";
 
-export default function PrestamosPage() {
+function PrestamosContent() {
   const { token } = useAuth();
 
   const [loans, setLoans] = useState<Loan[]>([]);
@@ -210,7 +210,9 @@ export default function PrestamosPage() {
                     <div className={styles.row}>
                       <span className={`${styles.badge} ${styles.badgeOk}`}>
                         Devuelto{" "}
-                        {l.returnedAt ? format(new Date(l.returnedAt), "yyyy-MM-dd") : ""}
+                        {l.returnedAt
+                          ? format(new Date(l.returnedAt), "yyyy-MM-dd")
+                          : ""}
                       </span>
                     </div>
                   </div>
@@ -223,5 +225,13 @@ export default function PrestamosPage() {
 
       {loading && <div className={styles.updating}>Actualizando…</div>}
     </RequireAuth>
+  );
+}
+
+export default function PrestamosPage() {
+  return (
+    <Suspense fallback={<div>Cargando préstamos...</div>}>
+      <PrestamosContent />
+    </Suspense>
   );
 }

@@ -1,13 +1,14 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import { useEffect, useState } from "react";
+
+import { useEffect, useState, Suspense } from "react";
 import { api } from "@/lib/api";
 import EmptyState from "@/components/EmptyState";
 import type { BookRef, FavoriteRow } from "@/types";
 import RequireAuth from "@/components/RequireAuth";
 import styles from "@/styles/components/Favorites.module.css";
 
-export default function FavoritosPage() {
+function FavoritosContent() {
   const [books, setBooks] = useState<BookRef[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -74,7 +75,9 @@ export default function FavoritosPage() {
 
                 <div className={styles.meta}>
                   <div className={styles.bookTitle}>{b.title}</div>
-                  <div className={styles.author}>{b.author || "Autor desconocido"}</div>
+                  <div className={styles.author}>
+                    {b.author || "Autor desconocido"}
+                  </div>
                   <div className={styles.year}>Año: {b.year || "N/A"}</div>
                 </div>
 
@@ -83,7 +86,7 @@ export default function FavoritosPage() {
                   onClick={async () => {
                     try {
                       await api.createLoan(b);
-                      alert("Préstamo creado correctamente.");
+                      alert("📚 Préstamo creado correctamente.");
                     } catch (err) {
                       console.error("Error creando préstamo:", err);
                       alert("No se pudo crear el préstamo.");
@@ -100,5 +103,13 @@ export default function FavoritosPage() {
         </div>
       )}
     </RequireAuth>
+  );
+}
+
+export default function FavoritosPage() {
+  return (
+    <Suspense fallback={<div>Cargando favoritos...</div>}>
+      <FavoritosContent />
+    </Suspense>
   );
 }
