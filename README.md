@@ -74,7 +74,7 @@ CORS_ORIGIN=http://localhost:3000
 ### Clonar el repositorio
 
 ```bash
-git clone [https://github.com/<tuusuario/capstone-laura-saenz.git](https://github.com/lttxsr/CapstoneLauraSaenz.git)
+git clone https://github.com/lttxsr/CapstoneLauraSaenz.git
 cd capstone-laura-saenz
 ```
 
